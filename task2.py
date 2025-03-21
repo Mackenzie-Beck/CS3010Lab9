@@ -44,12 +44,16 @@ class PlottingApp:
         subplot_frame = tk.Frame(root)
         subplot_frame.pack(pady=5)
         
-        tk.Label(subplot_frame, text="Subplot Layout:").grid(row=0, column=0)
-        self.num_rows = tk.Spinbox(subplot_frame, from_=1, to=3, width=3)
-        self.num_rows.grid(row=0, column=1, padx=5)
-        tk.Label(subplot_frame, text="×").grid(row=0, column=2)
-        self.num_cols = tk.Spinbox(subplot_frame, from_=1, to=3, width=3)
-        self.num_cols.grid(row=0, column=3, padx=5)
+        tk.Label(subplot_frame, text="Number of subplots:").grid(row=0, column=0)
+        self.num_subplots = tk.Spinbox(subplot_frame, from_=1, to=9, width=3)
+        self.num_subplots.grid(row=0, column=1, padx=5)
+        
+        tk.Label(subplot_frame, text="Orientation:").grid(row=0, column=2)
+        self.orientation = tk.StringVar(value="horizontal")
+        tk.Radiobutton(subplot_frame, text="Horizontal", variable=self.orientation,
+                      value="horizontal").grid(row=0, column=3)
+        tk.Radiobutton(subplot_frame, text="Vertical", variable=self.orientation,
+                      value="vertical").grid(row=0, column=4)
         
         # Style options frame
         style_frame = tk.Frame(root)
@@ -95,21 +99,27 @@ class PlottingApp:
         
     def plot_data(self):
         try:
-            # Get subplot layout dimensions from user input
-            rows = int(self.num_rows.get())
-            cols = int(self.num_cols.get())
-            total_plots = rows * cols
+            # Get number of subplots and orientation
+            num_plots = int(self.num_subplots.get())
+            is_horizontal = self.orientation.get() == "horizontal"
             
-            # Create subplot figure with appropriate size
-            fig, axes = plt.subplots(rows, cols, figsize=(5*cols, 4*rows))
+            # Set rows and columns based on orientation
+            if is_horizontal:
+                rows, cols = 1, num_plots
+                figsize = (5*num_plots, 4)
+            else:
+                rows, cols = num_plots, 1
+                figsize = (5, 4*num_plots)
+            
+            # Create subplot figure
+            fig, axes = plt.subplots(rows, cols, figsize=figsize)
             
             # Convert single subplot axis to array for consistent handling
-            if total_plots == 1:
+            if num_plots == 1:
                 axes = np.array([axes])
-            axes = axes.flatten()  # Convert 2D array of axes to 1D for easier iteration
             
             # Create each subplot
-            for i in range(total_plots):
+            for i in range(num_plots):
                 # Handle manual data input
                 if self.data_source.get() == "manual":
                     try:
@@ -130,10 +140,10 @@ class PlottingApp:
 
                 # Plot on the current axis
                 axes[i].plot(x, y,
-                             marker=self.marker.get(),
-                             linestyle=self.line_style.get(),
-                             linewidth=float(self.line_width.get()),
-                             color=self.color.get())
+                           marker=self.marker.get(),
+                           linestyle=self.line_style.get(),
+                           linewidth=float(self.line_width.get()),
+                           color=self.color.get())
                 axes[i].grid(True)
 
             # create a new tkinter window
