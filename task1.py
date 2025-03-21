@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 
 
@@ -51,14 +52,22 @@ class PlottingApp:
                 tk.messagebox.showerror("Error", "X and Y coordinates must have same length")
                 return
                 
-            # Create plot
-            plt.figure()
-            plt.plot(x, y, 
+            # Create a new Tkinter window
+            plot_window = tk.Toplevel(self.root)
+            plot_window.title("Plot")
+
+            # Create a Matplotlib figure and plot
+            fig, ax = plt.subplots()
+            ax.plot(x, y, 
                     marker=self.marker.get(),
                     linestyle=self.line_style.get(),
                     linewidth=float(self.line_width.get()))
-            plt.grid(True)
-            plt.show()
+            ax.grid(True)
+
+            # Create a canvas and add the figure to it
+            canvas = FigureCanvasTkAgg(fig, master=plot_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
             
         except ValueError:
             tk.messagebox.showerror("Error", "Invalid coordinate format")

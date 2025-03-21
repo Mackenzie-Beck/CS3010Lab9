@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import ttk, messagebox
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
 
@@ -101,6 +102,7 @@ class PlottingApp:
             
             # Create subplot figure with appropriate size
             fig, axes = plt.subplots(rows, cols, figsize=(5*cols, 4*rows))
+            
             # Convert single subplot axis to array for consistent handling
             if total_plots == 1:
                 axes = np.array([axes])
@@ -125,19 +127,24 @@ class PlottingApp:
                 else:
                     # Generate random data if not using manual input
                     x, y = self.generate_random_data()
-                
-                # Plot data with user-selected styling options
+
+                # Plot on the current axis
                 axes[i].plot(x, y,
-                         marker=self.marker.get(),
-                         linestyle=self.line_style.get(),
-                         linewidth=float(self.line_width.get()),
-                         color=self.color.get())
-                axes[i].grid(True)  # Add grid to subplot
-                axes[i].set_title(f'Subplot {i+1}')  # Add subplot title
-            
-            plt.tight_layout()  # Adjust subplot spacing
-            plt.show()  # Display the figure
-            
+                             marker=self.marker.get(),
+                             linestyle=self.line_style.get(),
+                             linewidth=float(self.line_width.get()),
+                             color=self.color.get())
+                axes[i].grid(True)
+
+            # create a new tkinter window
+            plot_window = tk.Toplevel(self.root)
+            plot_window.title("Plot")
+
+            # create a canvas and add the figure to it
+            canvas = FigureCanvasTkAgg(fig, master=plot_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
